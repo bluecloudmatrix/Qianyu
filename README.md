@@ -1,4 +1,0 @@
-# Qianyu
-Minimalist Game (Android)
-
-
