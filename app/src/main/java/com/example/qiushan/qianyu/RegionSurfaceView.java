@@ -22,7 +22,7 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     SurfaceHolder surfaceHolder;
     Thread thread;
     boolean flag;
-    int sleeptime=100;
+    int sleeptime=30;
     boolean isCollsion;
     /*define a rect*/
     Rect rect=new Rect(300, 300, 600, 600);
@@ -32,6 +32,7 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         super(context);
         paint=new Paint();
         paint.setTextSize(90);
+        paint.setStrokeWidth(5);
         paint.setStyle(Style.STROKE);
         paint.setAntiAlias(true);
         surfaceHolder=getHolder();
