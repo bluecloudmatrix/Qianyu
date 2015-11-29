@@ -34,6 +34,11 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     Region _region_b = new Region(rectb); // region 2
     Region _region_c = new Region(rectc); // region 3
 
+    private int mov_x = 0;
+    private int mov_y = 0;
+    private int mov_x_1 = 0;
+    private int mov_y_1 = 0;
+
     public RegionSurfaceView(Context context) {
         super(context);
         paint = new Paint();
@@ -60,6 +65,10 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
             paint.setColor(Color.GRAY);
             canvas.drawText("Collsion is false", 100, 100, paint);
         }
+        //paint.setColor(Color.RED);
+        canvas.drawLine(mov_x, mov_y, mov_x_1, mov_y_1, paint);
+        //mov_x = mov_x_1;
+        //mov_y = mov_y_1;
     }
 
     /**
@@ -75,6 +84,15 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         else{
             isCollsion = false;
         }
+
+        // drag
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            mov_x_1 = (int)event.getX();
+            mov_y_1 = (int)event.getY();
+        }
+        mov_x_1 = (int)event.getX();
+        mov_y_1 = (int)event.getY();
+
         return super.onTouchEvent(event);
     }
 
