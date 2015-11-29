@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Typeface;
@@ -23,7 +24,7 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     SurfaceHolder surfaceHolder;
     Thread thread;
     boolean flag;
-    int sleeptime = 10;
+    int sleeptime = 30;
     boolean isCollsion;
     /*define many rect*/
     Rect rect = new Rect(300, 300, 600, 600); // rectangle a
@@ -34,19 +35,26 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     Region _region_b = new Region(rectb); // region 2
     Region _region_c = new Region(rectc); // region 3
 
+
     private int mov_x = 0;
     private int mov_y = 0;
     private int mov_x_1 = 0;
     private int mov_y_1 = 0;
 
+    private Path mPath;
+    private float mPosX, mPosY;
+
     public RegionSurfaceView(Context context) {
         super(context);
         paint = new Paint();
         paint.setTextSize(50);
-        paint.setTypeface(Typeface.SANS_SERIF);
+        paint.setTypeface(Typeface.SERIF);
         paint.setStrokeWidth(5);
         paint.setStyle(Style.STROKE);
         paint.setAntiAlias(true);
+
+        mPath = new Path();
+
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
         thread = new Thread(this);
@@ -57,18 +65,22 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         canvas.drawRect(rect, paint);
         canvas.drawRect(rectb, paint);
         canvas.drawRect(rectc, paint);
+        canvas.drawCircle(800, 1500, 40, paint);
+
         if(isCollsion){
             paint.setColor(Color.BLUE);
-            canvas.drawText("Collsion is ture", 100, 100, paint);
+            canvas.drawText("Hit!", 100, 100, paint);
         }
         else{
             paint.setColor(Color.GRAY);
-            canvas.drawText("Collsion is false", 100, 100, paint);
+            canvas.drawText("Good! Keep", 100, 100, paint);
         }
         //paint.setColor(Color.RED);
-        canvas.drawLine(mov_x, mov_y, mov_x_1, mov_y_1, paint);
+        //canvas.drawLine(mov_x, mov_y, mov_x_1, mov_y_1, paint);
         //mov_x = mov_x_1;
         //mov_y = mov_y_1;
+
+        canvas.drawPath(mPath, paint);
     }
 
     /**
@@ -86,14 +98,39 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         }
 
         // drag
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+        /*if (event.getAction() == MotionEvent.ACTION_MOVE) {
             mov_x_1 = (int)event.getX();
             mov_y_1 = (int)event.getY();
         }
         mov_x_1 = (int)event.getX();
-        mov_y_1 = (int)event.getY();
-
-        return super.onTouchEvent(event);
+        mov_y_1 = (int)event.getY();*/
+        int action = event.getAction();
+        float x = event.getX();
+        float y = event.getY();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                //System.out.println("hehedown");
+                mPath.reset();
+                mPosX = x;
+                mPosY = y;
+                mPath.moveTo(x, y);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                //System.out.println("haha");
+                mPath.quadTo(mPosX, mPosY, x, y);
+                mPosX = x;
+                mPosY = y;
+                break;
+            case MotionEvent.ACTION_UP:
+                //System.out.println("heheup");
+                break;
+        }
+        //mPosX = x;
+        //mPosY = y;
+        //System.out.println("adbd");
+        invalidate();
+        //return super.onTouchEvent(event);
+        return true;
     }
 
     @Override
