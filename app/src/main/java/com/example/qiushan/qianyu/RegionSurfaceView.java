@@ -11,7 +11,9 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.RegionIterator;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -26,6 +28,8 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     boolean flag;
     int sleeptime = 30;
     boolean isCollsion;
+
+    boolean isWin;
     /*define many rect*/
     Rect rect = new Rect(300, 300, 600, 600); // rectangle a
     Rect rectb = new Rect(800, 800, 1000, 1000); // rectangle b
@@ -35,6 +39,9 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     Region _region_b = new Region(rectb); // region 2
     Region _region_c = new Region(rectc); // region 3
 
+    private Path ovalPath;
+    private RectF rf;
+    private Region aim;
 
     private int mov_x = 0;
     private int mov_y = 0;
@@ -55,6 +62,12 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
 
         mPath = new Path();
 
+        ovalPath = new Path();
+        rf = new RectF(800, 1500, 900, 1600);
+        ovalPath.addOval(rf, Path.Direction.CCW);
+        aim = new Region();
+        aim.setPath(ovalPath, new Region(800, 1500, 900, 1600));
+
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
         thread = new Thread(this);
@@ -65,15 +78,23 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         canvas.drawRect(rect, paint);
         canvas.drawRect(rectb, paint);
         canvas.drawRect(rectc, paint);
-        canvas.drawCircle(800, 1500, 40, paint);
+        //canvas.drawCircle(800, 1500, 40, paint);
+        drawRegion(canvas, aim, paint);
 
-        if(isCollsion){
+        if (isCollsion) {
             paint.setColor(Color.BLUE);
             canvas.drawText("Hit!", 100, 100, paint);
-        }
-        else{
+        } else {
             paint.setColor(Color.GRAY);
             canvas.drawText("Good! Keep", 100, 100, paint);
+        }
+
+        if (isWin) {
+            paint.setColor(Color.GREEN);
+            canvas.drawText("Win!", 700, 100, paint);
+        } else {
+            paint.setColor(Color.GRAY);
+            canvas.drawText("Silent", 700, 100, paint);
         }
         //paint.setColor(Color.RED);
         //canvas.drawLine(mov_x, mov_y, mov_x_1, mov_y_1, paint);
@@ -95,6 +116,12 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         }
         else{
             isCollsion = false;
+        }
+
+        if (aim.contains((int)event.getX(), (int)event.getY())) {
+            isWin = true;
+        } else {
+            isWin = false;
         }
 
         // drag
@@ -179,4 +206,13 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         flag = true;
     }
 
+
+    private void drawRegion(Canvas canvas, Region rgn, Paint paint) {
+        RegionIterator iter = new RegionIterator(rgn);
+        Rect r = new Rect();
+
+        while (iter.next(r)) {
+            canvas.drawRect(r, paint);
+        }
+    }
 }
