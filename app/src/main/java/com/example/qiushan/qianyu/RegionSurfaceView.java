@@ -15,11 +15,16 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.RegionIterator;
 import android.graphics.Typeface;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RegionSurfaceView extends SurfaceView implements Callback,Runnable {
     Paint paint;
@@ -51,6 +56,19 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
     private Path mPath;
     private float mPosX, mPosY;
 
+    private boolean timing = true;
+    private final Timer timer = new Timer();
+    private TimerTask task;
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            timing = false;
+            super.handleMessage(msg);
+        }
+    };
+
     public RegionSurfaceView(Context context) {
         super(context);
         paint = new Paint();
@@ -71,14 +89,28 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
         thread = new Thread(this);
+
+        task = new TimerTask() {
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                Message message = new Message();
+                message.what = 1;
+                handler.sendMessage(message);
+            }
+        };
+
+        timer.schedule(task, 5000);
+
     }
 
     private void mydraw(Canvas canvas){
         canvas.drawColor(Color.WHITE);
-        canvas.drawRect(rect, paint);
-        canvas.drawRect(rectb, paint);
-        canvas.drawRect(rectc, paint);
-        //canvas.drawCircle(800, 1500, 40, paint);
+        if (timing) {
+            canvas.drawRect(rect, paint);
+            canvas.drawRect(rectb, paint);
+            canvas.drawRect(rectc, paint);
+        }
         drawRegion(canvas, aim, paint);
 
         if (isCollsion) {
@@ -96,10 +128,6 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
             paint.setColor(Color.GRAY);
             canvas.drawText("Silent", 700, 100, paint);
         }
-        //paint.setColor(Color.RED);
-        //canvas.drawLine(mov_x, mov_y, mov_x_1, mov_y_1, paint);
-        //mov_x = mov_x_1;
-        //mov_y = mov_y_1;
 
         canvas.drawPath(mPath, paint);
     }
@@ -125,36 +153,25 @@ public class RegionSurfaceView extends SurfaceView implements Callback,Runnable 
         }
 
         // drag
-        /*if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            mov_x_1 = (int)event.getX();
-            mov_y_1 = (int)event.getY();
-        }
-        mov_x_1 = (int)event.getX();
-        mov_y_1 = (int)event.getY();*/
         int action = event.getAction();
         float x = event.getX();
         float y = event.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                //System.out.println("hehedown");
                 mPath.reset();
                 mPosX = x;
                 mPosY = y;
                 mPath.moveTo(x, y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                //System.out.println("haha");
                 mPath.quadTo(mPosX, mPosY, x, y);
                 mPosX = x;
                 mPosY = y;
                 break;
             case MotionEvent.ACTION_UP:
-                //System.out.println("heheup");
                 break;
         }
-        //mPosX = x;
-        //mPosY = y;
-        //System.out.println("adbd");
+
         invalidate();
         //return super.onTouchEvent(event);
         return true;
