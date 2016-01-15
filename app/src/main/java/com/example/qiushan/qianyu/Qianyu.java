@@ -30,6 +30,7 @@ public class Qianyu extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
         setContentView(new RegionSurfaceView(this));
+        //setContentView(R.layout.activity_main);
         /*
         setContentView(R.layout.activity_qianyu);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
